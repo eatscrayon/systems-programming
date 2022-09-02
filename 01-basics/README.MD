@@ -1,4 +1,5 @@
-Building the examples with gcc
+Build the examples with gcc
+
 ```gcc -Wall -g -o outputfile inputfile.c```
 
 
