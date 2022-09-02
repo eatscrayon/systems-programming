@@ -1,4 +1,4 @@
-/* C while loop example */
+/* C loop examples */
 #include <stdio.h>
 
 int main()
@@ -54,6 +54,20 @@ int main()
     {
         printf("%d", j++);
     } while (j < 10);
+
+        int num, i;
+
+    // Example 5 for loop
+    printf("Enter a value: ");
+    scanf("%d", &num);
+    // make sure num is not negative
+    if (num < 0) {
+        num = -num;
+    }
+
+    for (i = 0; i < num; i++) {
+        printf("%d\n", i);
+    }
 
     return 0;
 }
