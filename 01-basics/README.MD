@@ -1,4 +1,4 @@
-Go Read https://diveintosystems.org/singlepage/#_dive_into_systems
+
 
 
 Build the examples with gcc
