@@ -46,5 +46,14 @@ int main()
 
     printf("The value read in is %d\n", data);
 
+    // Example 4 do-while
+    int j;
+
+    j = 0;
+    do
+    {
+        printf("%d", j++);
+    } while (j < 10);
+
     return 0;
 }
