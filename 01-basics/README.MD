@@ -1,3 +1,7 @@
+Building the examples with gcc
+```gcc -Wall -g -o outputfile inputfile.c```
+
+
 
 |Type name | Usual size    | Values stored  |How to declare|
 |----------|---------------|----------------|--------------|
