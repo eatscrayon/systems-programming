@@ -55,17 +55,18 @@ int main()
         printf("%d", j++);
     } while (j < 10);
 
-        int num, i;
+    
 
     // Example 5 for loop
+    int k;
     printf("Enter a value: ");
-    scanf("%d", &num);
+    scanf("%d", &k);
     // make sure num is not negative
-    if (num < 0) {
-        num = -num;
+    if (k < 0) {
+        k = -k;
     }
 
-    for (i = 0; i < num; i++) {
+    for (i = 0; i < k; i++) {
         printf("%d\n", i);
     }
 
