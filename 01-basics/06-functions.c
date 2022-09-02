@@ -20,7 +20,8 @@ void print_table(int start, int stop);
  * program does when it begins executing, and it's typically used to organize
  * the big-picture behavior of the program.
  */
-int main() {
+int main()
+{
     int x, y, larger;
 
     printf("This program will operate over two int values.\n");
@@ -49,12 +50,14 @@ int main() {
  *   n2: the other value
  *   returns: the larger of n1 and n2
  */
-int max(int n1, int n2)  {
+int max(int n1, int n2)
+{
     int result;
 
     result = n1;
 
-    if (n2 > n1) {
+    if (n2 > n1)
+    {
         result = n2;
     }
 
@@ -65,11 +68,13 @@ int max(int n1, int n2)  {
  *   start: the beginning of the range
  *   stop: the end of the range
  */
-void print_table(int start, int stop) {
+void print_table(int start, int stop)
+{
     int i;
 
-    for (i = start; i <= stop; i++) {
-        printf("%d\t", i*i);
+    for (i = start; i <= stop; i++)
+    {
+        printf("%d\t", i * i);
     }
 
     printf("\n");
