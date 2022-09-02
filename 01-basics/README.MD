@@ -1,3 +1,4 @@
+```
 Type name 	Usual size 	Values stored 	How to declare
 
 char		1 byte 		integers 		char x;
@@ -14,3 +15,4 @@ float 		4 bytes 	signed real 	float x;
 
 double 		8 bytes 	signed real 	double x;
 
+```
