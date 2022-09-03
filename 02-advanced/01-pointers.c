@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main()
+void simple_examples()
 {
     int *ptr;   // stores the memory address of an int (ptr "points to" an int)
     char *cptr; // stores the memory address of a char (cptr "points to" a char)
@@ -22,5 +22,35 @@ int main()
     ptr1 = &y; // change ptr1's value (change what it points to)
     *ptr1 = 80;
 
+}
+int change_value(int *input);
+
+int main() {
+    int x;
+    int y;
+
+    x = 30;
+    y = change_value(&x);
+    printf("x: %d y: %d\n", x, y);  // prints x: 100 y: 30
+
     return 0;
+}
+
+/*
+ * changes the value of the argument
+ *     input: a pointer to the value to change
+ *     returns: the original value of the argument
+ */
+int change_value(int *input) {
+    int val;
+
+    val = *input; /* val gets the value input points to */
+
+    if (val < 100) {
+        *input = 100;  /* the value input points to gets 100 */
+    } else {
+        *input =  val * 2;
+    }
+
+    return val;
 }
