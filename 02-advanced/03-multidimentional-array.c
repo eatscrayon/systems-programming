@@ -59,6 +59,6 @@ int main() {
         init2D(two_d_array, N, M);
     }
     
-    printf("Dynamically Allocated [10*M + 10]: %d\n", two_d_array[10*M + 10]);
+    printf("Dynamically Allocated [10*M + 10]: %d\n", two_d_array[2*M + 2]);
     
 }
