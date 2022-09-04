@@ -31,9 +31,25 @@ void init2D(int *arr, int rows, int cols) {
     }
 }
 
+/*
+ * initialize a 2D array
+ * arr: the array
+ * rows: number of rows
+ * cols: number of columns
+ */
+void init2D_Method2(int **arr, int rows, int cols) {
+    int i,j;
+
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < cols; j++) {
+            arr[i][j] = 66;
+        }
+    }
+}
+
 int main() {
     // Example 1
-    // Statically Allocated on the stack
+    // Statically Allocated 
     //
     int matrix[50][COLS];
     int bigger[90][COLS];
@@ -43,9 +59,9 @@ int main() {
 
     printf("Statically Allocated [10][10]: %d\n",matrix[10][10]);
 
-    // Example 2
+    // Example 2: Method 1
     // Dynamically Allocated 2D Arrays on the heap
-    // Method 1
+    // 
 
     int *two_d_array;    // the type is a pointer to an int (the element type)
 
@@ -59,6 +75,29 @@ int main() {
         init2D(two_d_array, N, M);
     }
     
-    printf("Dynamically Allocated [2*M + 2]: %d\n", two_d_array[2*M + 2]);
-    
+    printf("Method 1 Dynamically Allocated [2*M + 2]: %d\n", two_d_array[2*M + 2]);
+
+    //
+    // Example 3: Method 2
+    //
+    // the 2D array variable is declared to be `int **` (a pointer to an int *)
+    // a dynamically allocated array of dynamically allocated int arrays
+    // (a pointer to pointers to ints)
+
+    int **real_two_d_array;
+    int i;
+
+    // allocate an array of N pointers to ints
+    // malloc returns the address of this array (a pointer to (int *)'s)
+    real_two_d_array = malloc(sizeof(int *) * N);
+
+    // for each row, malloc space for its column elements and add it to
+    // the array of arrays
+    for (i = 0; i < N; i++) {
+    // malloc space for row i's M column elements
+        real_two_d_array[i] = malloc(sizeof(int) * M);
+    }
+    init2D_Method2(real_two_d_array, N, M);
+    printf("Method 2 Dynamically Allocated [2][2]: %d\n", real_two_d_array[2][2]);
+
 }
