@@ -94,7 +94,7 @@ int main() {
     // for each row, malloc space for its column elements and add it to
     // the array of arrays
     for (i = 0; i < N; i++) {
-    // malloc space for row i's M column elements
+    // malloc space for row i's M column elements 
         real_two_d_array[i] = malloc(sizeof(int) * M);
     }
     init2D_Method2(real_two_d_array, N, M);
