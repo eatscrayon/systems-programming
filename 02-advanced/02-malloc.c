@@ -18,7 +18,7 @@ int main() {
 
 
     //
-    //
+    // Example 2
     //
 
     int s_array[20];
@@ -36,4 +36,7 @@ int main() {
     }
 
     printf("%d %d \n", s_array[3], d_array[3]);  // prints 3 3
+
+    free(d_array);
+    d_array = NULL;
 }
