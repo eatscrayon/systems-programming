@@ -40,18 +40,68 @@ $ ./a.out < infile.txt 1> outfile.txt 2> errorfile.txt
 #include <stdio.h>
 #include <stdlib.h>
 int main(){
-    FILE * infile;
-    FILE * outfile;
+    FILE *infile;
+    FILE *outfile;
     infile = fopen("07-io-and-printf.c", "r");  // relative path name of file, read mode
     if (infile == NULL) {
         printf("Error: unable to open file %s\n", "07-io-and-printf.c");
         exit(1);
     }
 
+
     // fopen with absolute path name of file, write mode
-    outfile = fopen("/home/me/output.txt", "w");
+    outfile = fopen("output.txt", "w");
     if (outfile == NULL) {
         printf("Error: unable to open outfile\n");
         exit(1);
     }
+    int ch;  // EOF is not a char value, but is an int.
+         // since all char values can be stored in int, use int for ch
+
+    ch = getc(infile);      // read next char from the infile stream
+    if (ch != EOF) {
+        putc(ch, outfile);  // write char value to the outfile stream
+
+    rewind(infile);
+
+    // to move to a specific location in the file:
+    // fseek(FILE *f, long offset, int whence);
+
+    fseek(infile, 0, SEEK_SET);    // seek to the beginning of the file
+    fseek(infile, 3, SEEK_CUR);    // seek 3 chars forward from the current position
+    fseek(infile, -3, SEEK_END);   // seek 3 chars back from the end of the file
+
+    // int x;
+    // double d;
+    // char c, array[MAX];
+    // write int & char values to file separated by colon with newline at the end
+    // fprintf(outfile, "%d:%c\n", x, c);
+
+    // read an int & char from file where int and char are separated by a comma
+    // fscanf(infile, "%d,%c", &x, &c);
+
+    // read a string from a file into array (stops reading at whitespace char)
+    // fscanf(infile,"%s", array);
+
+    // read a double and a string up to 24 chars from infile
+    // fscanf(infile, "%lf %24s", &d, array);
+
+    // read in a string consisting of only char values in the specified set (0-5)
+    // stops reading when...
+    //   20 chars have been read OR
+    //   a character not in the set is reached OR
+    //   the file stream reaches end-of-file (EOF)
+    // fscanf(infile, "%20[012345]", array);
+
+    // read in a string; stop when reaching a punctuation mark from the set
+    // fscanf(infile, "%[^.,:!;]", array);
+
+    // read in two integer values: store first in long, second in int
+    // then read in a char value following the int value
+    // fscanf(infile, "%ld %d%c", &x, &b, &c);
+
+    fclose(infile);
+    fclose(outfile);
+}
+
 }
