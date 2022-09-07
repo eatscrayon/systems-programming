@@ -15,7 +15,7 @@ int IsNumeric(const char* CharacterList)
     return 1;
 }
 
-pid_t GetPIDbyName(const char* cchrptr_ProcessName)
+pid_t GetPIDbyName(const char* ProcessName)
 {
 
     int ipid = -1; // Set our PID to -1 in case we can't find it
@@ -70,7 +70,7 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
                     
                     // like strstr(), but ignores the case of both arguments.
                     // is our taget process a substring of the cmdline?
-                    if ( strcasestr(StringToCompare, cchrptr_ProcessName) )
+                    if ( strcasestr(StringToCompare, ProcessName) )
                     {
                         ipid = atoi(directory_entry->d_name); //converts C-string to int.
                         closedir(directory) ; //close the directory
