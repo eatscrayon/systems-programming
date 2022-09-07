@@ -87,7 +87,6 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
 //Define our struct that will hold process information
 typedef struct LinuxProc{
 
-    char*    ProcMemPath;
     pid_t    ProcId;
 
 } LinuxProc; //<-type def
