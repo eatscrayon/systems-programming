@@ -100,7 +100,7 @@ int main(int argc, char **argv)
     };
 
     //Print the PID of the Process
-    printf("Process ID : %i\n", Process.ProcId);
-
+    (Process.ProcId > 0) ? printf("Process ID : %i\n", Process.ProcId ) : printf("PID Not Found\n");
+    
     return 0;
 }
