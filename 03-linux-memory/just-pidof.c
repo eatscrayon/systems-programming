@@ -20,12 +20,6 @@
 #define EXACT_MATCH       1
 #define INEXACT_MATCH     0
 
-typedef struct LinuxProc{
-
-    char*    ProcMemPath;
-    pid_t    ProcId;
-
-} LinuxProc; //type def
 
 int IsNumeric(const char* ccharptr_CharacterList)
 {
@@ -37,9 +31,8 @@ int IsNumeric(const char* ccharptr_CharacterList)
 
 pid_t GetPIDbyName(const char* cchrptr_ProcessName)
 {
-    int intExactMatch =0;
-    int intCaseSensitiveness = 0;
-    int ipid = -1;
+
+    int ipid = -1; // Set our PID to -1 in case we can't find it
     char chrarry_CommandLinePath[800]  ;
     char chrarry_NameOfProcess[500]  ;
     char* chrptr_StringToCompare = NULL ;
@@ -88,8 +81,18 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
     return ipid ;
 }
 
+//Define our struct that will hold process information
+typedef struct LinuxProc{
+
+    char*    ProcMemPath;
+    pid_t    ProcId;
+
+} LinuxProc; //<-type def
+
 int main(int argc, char **argv)
 {
+    //Initialize our struct that will hold process information
+    //Passing argv1 to the GetPIDbyName Function
     LinuxProc Process = { 
         .ProcId = GetPIDbyName(argv[1])
     };
