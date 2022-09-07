@@ -20,12 +20,12 @@
 #define EXACT_MATCH       1
 #define INEXACT_MATCH     0
 
-typedef struct LinuxProc_s{
+typedef struct LinuxProc{
 
     char*    ProcMemPath;
     pid_t    ProcId;
 
-} LinuxProc_t; //type def
+} LinuxProc; //type def
 
 int IsNumeric(const char* ccharptr_CharacterList)
 {
@@ -90,7 +90,7 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
 
 int main(int argc, char **argv)
 {
-    LinuxProc_t Process = { 
+    LinuxProc Process = { 
         .ProcId = GetPIDbyName(argv[1])
     };
 
