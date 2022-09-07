@@ -2,29 +2,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include <stdarg.h>
 #include <dirent.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ptrace.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-
-#define PROC_DIRECTORY "/proc/"  
-#define CASE_SENSITIVE    1
-#define CASE_INSENSITIVE  0
-#define EXACT_MATCH       1
-#define INEXACT_MATCH     0
 
 
-int IsNumeric(const char* ccharptr_CharacterList)
+// Loop through a string and return True if the string is only made of chars 0-9
+int IsNumeric(const char* CharacterList)
 {
-    for ( ; *ccharptr_CharacterList; ccharptr_CharacterList++)
-        if (*ccharptr_CharacterList < '0' || *ccharptr_CharacterList > '9')
+    for ( ; *CharacterList; CharacterList++)
+        if (*CharacterList < '0' || *CharacterList > '9')
             return 0;
     return 1;
 }
@@ -33,52 +19,69 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
 {
 
     int ipid = -1; // Set our PID to -1 in case we can't find it
-    char chrarry_CommandLinePath[800]  ;
-    char chrarry_NameOfProcess[500]  ;
-    char* chrptr_StringToCompare = NULL ;
-    struct dirent* de_DirEntity = NULL ;
-    DIR* dir_proc = NULL ;
+    char CommandLinePath[800]  ; // Create a char array to hold /proc/$pid/cmdline
+    char NameOfProcess[500]  ; // Create a char array to hold the name of the found process
+    char* StringToCompare = NULL ; // Null pointer to the contents of /proc/$pid/cmdline
+    DIR* directory = NULL ; // Null pointer to a directory struct from <dirent.h>
+    struct dirent* directory_entry = NULL ; // Null pointer to a dirent structure <dirent.h>
+    
 
-    dir_proc = opendir(PROC_DIRECTORY) ;
-    if (dir_proc == NULL)
+    // Init our DIR* directory struct
+    directory = opendir("/proc/") ;
+    if (directory == NULL)
     {
-        perror("Couldn't open the " PROC_DIRECTORY " directory") ;
+        perror("Couldn't open the /proc/ directory") ;
         return  -2 ;
     }
 
-
-    while ((de_DirEntity = readdir(dir_proc)) )
+    // Loop through the contents of our directory
+    while ((directory_entry = readdir(directory)) ) // Returns a pointer to a dirent structure
     {
-        if (de_DirEntity->d_type == DT_DIR)
+        if (directory_entry->d_type == DT_DIR) // if the type is a directory
         {
-            if (IsNumeric(de_DirEntity->d_name))
+            if (IsNumeric(directory_entry->d_name)) // and the name is only numbers...
             {
-                strcpy(chrarry_CommandLinePath, PROC_DIRECTORY) ;
-                strcat(chrarry_CommandLinePath, de_DirEntity->d_name) ;
-                strcat(chrarry_CommandLinePath, "/cmdline") ;
-                FILE* fd_CmdLineFile = fopen (chrarry_CommandLinePath, "rt") ; 
-                if (fd_CmdLineFile)
+                // The numbered folders in /proc correspond to the running processes
+                // Inside each folder is a file call "cmdline" which has the name of the process
+                // Build this filename and store it in CommandLinePath
+                strcpy(CommandLinePath, "/proc/") ; // "/proc/"
+                strcat(CommandLinePath, directory_entry->d_name) ; // "/proc/666"
+                strcat(CommandLinePath, "/cmdline") ;  // "/proc/666/cmdline"
+
+                // Open the file that we constructed in the previious step
+                //"rt" mean read mode + text mode
+                // CmdLineFile is a pointer to a FILE struct
+                FILE* CmdLineFile = fopen (CommandLinePath, "rt") ; 
+                
+                if (CmdLineFile) // CmdLineFile is NULL if the file didn't open
                 {
-                    fscanf(fd_CmdLineFile, "%s", chrarry_NameOfProcess) ; 
-                    fclose(fd_CmdLineFile);
+                    // This will read CmdLineFile until a whitespace "%s" is found
+                    // and store the contents in NameOfProcess
+                    fscanf(CmdLineFile, "%s", NameOfProcess) ; 
+                    fclose(CmdLineFile); //close thefile
 
-                    if (strrchr(chrarry_NameOfProcess, '/'))
-                        chrptr_StringToCompare = strrchr(chrarry_NameOfProcess, '/') +1 ;
+                    // strrchr return a pointer to the last occurrence of character in str.
+                    // so if we find a '/' then we jump to right of the last '/'
+                    // in the string, else we store the pointer as is
+                    if (strrchr(NameOfProcess, '/')) 
+                        StringToCompare = strrchr(NameOfProcess, '/') +1 ; 
                     else
-                        chrptr_StringToCompare = chrarry_NameOfProcess ;
-
-                    if ( strcasestr(chrptr_StringToCompare, cchrptr_ProcessName) )
+                        StringToCompare = NameOfProcess ;
+                    
+                    // like strstr(), but ignores the case of both arguments.
+                    // is our taget process a substring of the cmdline?
+                    if ( strcasestr(StringToCompare, cchrptr_ProcessName) )
                     {
-                        ipid = atoi(de_DirEntity->d_name);
-                        closedir(dir_proc) ;
-                        return ipid;
+                        ipid = atoi(directory_entry->d_name); //converts C-string to int.
+                        closedir(directory) ; //close the directory
+                        return ipid; // Break out of the loop and return the PID
                     }
                 }
             }
         }
     }
-    closedir(dir_proc) ;
-    return ipid ;
+    closedir(directory) ;// We didn't find it, close the directory
+    return ipid ; // We didn't find it, return -1
 }
 
 //Define our struct that will hold process information
@@ -97,8 +100,8 @@ int main(int argc, char **argv)
         .ProcId = GetPIDbyName(argv[1])
     };
 
+    //Print the PID of the Process
     printf("Process ID : %i\n", Process.ProcId);
-    
 
     return 0;
 }
