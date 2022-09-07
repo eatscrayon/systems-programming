@@ -25,17 +25,7 @@ typedef struct LinuxProc_s{
     char*    ProcMemPath;
     pid_t    ProcId;
 
-} LinuxProc_t;
-
-
-LinuxProc_t LinuxProcFromID(pid_t pid)
-{
-    char mem_file_name[1000];
-    LinuxProc_t ProcStruct;
-    ProcStruct.ProcId = pid;
-    ProcStruct.ProcMemPath = mem_file_name;
-    return ProcStruct;
-}
+} LinuxProc_t; //type def
 
 int IsNumeric(const char* ccharptr_CharacterList)
 {
@@ -43,22 +33,6 @@ int IsNumeric(const char* ccharptr_CharacterList)
         if (*ccharptr_CharacterList < '0' || *ccharptr_CharacterList > '9')
             return 0;
     return 1;
-}
-
-uintptr_t strcmp_ws(const char *s1, const char *s2, int intCaseSensitive)
-{
-    if (intCaseSensitive)
-        return !strcmp(s1, s2);
-    else
-        return !strcasecmp(s1, s2);
-}
-
-uintptr_t strstr_ws(const char* haystack, const char* needle, int intCaseSensitive)
-{
-    if (intCaseSensitive)
-        return (uintptr_t) strstr(haystack, needle);
-    else
-        return (uintptr_t) strcasestr(haystack, needle);
 }
 
 pid_t GetPIDbyName(const char* cchrptr_ProcessName)
@@ -71,14 +45,6 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
     char* chrptr_StringToCompare = NULL ;
     struct dirent* de_DirEntity = NULL ;
     DIR* dir_proc = NULL ;
-
-    uintptr_t (*CompareFunction) (const char*, const char*, int) ;
-
-    if (intExactMatch)
-        CompareFunction = &strcmp_ws;
-    else
-        CompareFunction = &strstr_ws;
-
 
     dir_proc = opendir(PROC_DIRECTORY) ;
     if (dir_proc == NULL)
@@ -108,7 +74,7 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
                     else
                         chrptr_StringToCompare = chrarry_NameOfProcess ;
 
-                    if ( CompareFunction(chrptr_StringToCompare, cchrptr_ProcessName, intCaseSensitiveness) )
+                    if ( strcasestr(chrptr_StringToCompare, cchrptr_ProcessName) )
                     {
                         ipid = atoi(de_DirEntity->d_name);
                         closedir(dir_proc) ;
@@ -124,8 +90,10 @@ pid_t GetPIDbyName(const char* cchrptr_ProcessName)
 
 int main(int argc, char **argv)
 {
-    LinuxProc_t Process;
-    Process = LinuxProcFromID((pid_t)GetPIDbyName(argv[1]));
+    LinuxProc_t Process = { 
+        .ProcId = GetPIDbyName(argv[1])
+    };
+
     printf("Process ID : %i\n", Process.ProcId);
     
 
