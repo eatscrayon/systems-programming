@@ -204,6 +204,10 @@ typedef struct LinuxProc
 
 int main(int argc, char **argv)
 {
+    if (argc < 2){
+        printf("Usage: a.out <process name>\n");
+        exit(EXIT_SUCCESS);
+    }
     // Initialize our struct that will hold process information
     // Passing argv1 to the GetPIDbyName Function
     LinuxProc Process = {
@@ -211,7 +215,9 @@ int main(int argc, char **argv)
 
     // Print the PID of the Process
     (Process.ProcId > 0) ? printf("Process ID : %i\n", Process.ProcId) : printf("PID Not Found\n");
-
+    if (Process.ProcId < 0){
+        exit(EXIT_SUCCESS);
+    }
     // Read memory maps of the process
     uintptr_t heap_offset, heap_size;
     read_proc_maps(Process.ProcId, &heap_offset, &heap_size);
