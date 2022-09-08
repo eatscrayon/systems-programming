@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <dirent.h>
@@ -47,6 +48,8 @@ int IsNumeric(const char* CharacterList)
     return 1;
 }
 
+
+
 pid_t GetPIDbyName(const char* ProcessName)
 {
 
@@ -89,7 +92,7 @@ pid_t GetPIDbyName(const char* ProcessName)
                     // This will read CmdLineFile until a whitespace "%s" is found
                     // and store the contents in NameOfProcess
                     char NameOfProcess[4096]  ; // Create a char array to hold the name of the found process
-                    fscanf(CmdLineFile, "%s", NameOfProcess) ; 
+                    fscanf(CmdLineFile, "%4095s", NameOfProcess) ; 
                     fclose(CmdLineFile); //close thefile
 
                     // strrchr return a pointer to the last occurrence of character in str.
@@ -116,10 +119,47 @@ pid_t GetPIDbyName(const char* ProcessName)
     return ipid ; // We didn't find it, return -1
 }
 
+void read_proc_maps(pid_t pid,uintptr_t* heap_offset, uintptr_t* heap_size){
+
+    char pid_string[10];
+    sprintf(pid_string, "%d", pid);
+
+    char *mapsFile = concat(3,"/proc/",pid_string,"/maps");
+
+    FILE* file = fopen(mapsFile, "r"); 
+    char line[4096];
+    if (mapsFile){
+        while (fgets(line, sizeof(line), file)) {
+            if (strcasestr(line,"[heap]")){
+            char *address_space;
+            address_space = strtok(line, " ");
+            char *map_start;
+            char *map_end;
+            map_start = strtok(address_space, "-");
+            map_end = strtok(NULL, "-");
+            //printf("AS STRING: %s %s\n", map_start, map_end);
+            uintptr_t int_map_start;
+            uintptr_t int_map_end;
+            sscanf(map_start, "%lx", &int_map_start);
+            sscanf(map_end, "%lx", &int_map_end);
+            //printf("AS PID_t : %lx %lx\n", int_map_start, int_map_end);
+            *heap_offset = int_map_start;
+            *heap_size = int_map_end - int_map_start;
+            fclose(file);
+            break;
+            }
+        }
+    }
+
+
+}
+
 //Define our struct that will hold process information
 typedef struct LinuxProc{
 
-    pid_t    ProcId;
+    pid_t          ProcId;
+    uintptr_t      HeapOffset;
+    uintptr_t      HeapSize;
 
 } LinuxProc; //<-type def
 
@@ -133,6 +173,21 @@ int main(int argc, char **argv)
 
     //Print the PID of the Process
     (Process.ProcId > 0) ? printf("Process ID : %i\n", Process.ProcId ) : printf("PID Not Found\n");
+
+    // Read memory maps of the process
+    uintptr_t heap_offset, heap_size;
+    read_proc_maps(Process.ProcId, &heap_offset, &heap_size);
+    Process.HeapOffset = heap_offset;
+    Process.HeapSize = heap_size;
+
+    // Print Heap location and size
+    (Process.HeapOffset > 0) ? printf("Heap Offset : %lx\n", Process.HeapOffset ) : printf("Heap Offset Not Found\n");
+    (Process.HeapSize > 0) ? printf("Heap Size : %lx\n", Process.HeapSize ) : printf("Heap Size Not Found\n");
+    
+    // use process_vm_readv() to read some memory
+    // https://gist.github.com/FergusInLondon/fec6aebabc3c9e61e284983618f40730
+    // process_vm_writev() to write some memory
+    // https://ancat.github.io/python/2019/01/01/python-ptrace.html 
     
     exit(EXIT_SUCCESS);
 }
