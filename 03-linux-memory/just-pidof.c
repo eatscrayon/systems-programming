@@ -51,7 +51,6 @@ pid_t GetPIDbyName(const char* ProcessName)
 {
 
     int ipid = -1; // Set our PID to -1 in case we can't find it
-    char NameOfProcess[500]  ; // Create a char array to hold the name of the found process
     char* StringToCompare = NULL ; // Null pointer to the contents of /proc/$pid/cmdline
     DIR* directory = NULL ; // Null pointer to a directory struct from <dirent.h>
     struct dirent* directory_entry = NULL ; // Null pointer to a dirent structure <dirent.h>
@@ -68,6 +67,7 @@ pid_t GetPIDbyName(const char* ProcessName)
     // Loop through the contents of our directory
     while ((directory_entry = readdir(directory)) ) // Returns a pointer to a dirent structure
     {
+        
         if (directory_entry->d_type == DT_DIR) // if the type is a directory
         {
             if (IsNumeric(directory_entry->d_name)) // and the name is only numbers...
@@ -88,6 +88,7 @@ pid_t GetPIDbyName(const char* ProcessName)
                 {
                     // This will read CmdLineFile until a whitespace "%s" is found
                     // and store the contents in NameOfProcess
+                    char NameOfProcess[4096]  ; // Create a char array to hold the name of the found process
                     fscanf(CmdLineFile, "%s", NameOfProcess) ; 
                     fclose(CmdLineFile); //close thefile
 
@@ -98,7 +99,7 @@ pid_t GetPIDbyName(const char* ProcessName)
                         StringToCompare = strrchr(NameOfProcess, '/') +1 ; 
                     else
                         StringToCompare = NameOfProcess ;
-                    
+
                     // like strstr(), but ignores the case of both arguments.
                     // is our taget process a substring of the cmdline?
                     if ( strcasestr(StringToCompare, ProcessName) )
