@@ -5,7 +5,7 @@
 int main(){
 
     char *p = malloc(15);
-	strcpy(p, "Hello, world!");
+	strcpy(p, "Hello world!");
     while (1){
     printf("%s\n",p);
     sleep(1);

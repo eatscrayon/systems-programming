@@ -200,7 +200,7 @@ void poke(pid_t pid, uintptr_t offset, uintptr_t find_size,char replace[]){
 }
 
 
-void seek_and_poke(pid_t pid, char heap[], uintptr_t heapSize, uintptr_t heapoffset, char find[], uintptr_t find_size, char replace[]){
+void seek_and_poke(pid_t pid, char heap[], uintptr_t heapSize, uintptr_t heapoffset, char find[], uintptr_t find_size, char replace[],uintptr_t replace_size){
 
     //printf("%ld", find_size);
     
@@ -214,8 +214,8 @@ void seek_and_poke(pid_t pid, char heap[], uintptr_t heapSize, uintptr_t heapoff
             }
         }
         if (match){
-            printf("Want to poke %d @ %lx\n with %ld bytes\n",pid, i+heapoffset, find_size );
-            poke(pid, i+heapoffset, find_size,replace);
+            printf("Poking %d @ %lx with %ld bytes\n",pid, i+heapoffset, replace_size );
+            poke(pid, i+heapoffset, replace_size,replace);
         }
         //fprint("%d",heap[i])
     }
@@ -247,6 +247,16 @@ void hexdump(char buffer[],int size){
 
 }
 
+unsigned char* hexstr_to_char(const char* hexstr)
+{
+    size_t len = strlen(hexstr);
+    size_t final_len = len / 2;
+    unsigned char* chrs = (unsigned char*)malloc(( final_len + 1) * sizeof(*chrs));
+    for (size_t i=0, j=0; j<final_len; i+=2, j++)
+        chrs[j] = (hexstr[i] % 32 + 9) % 25 * 16 + (hexstr[i+1] % 32 + 9) % 25;
+    chrs[final_len] = '\0';
+    return chrs;
+}
 
 int main(int argc, char **argv)
 {
@@ -268,11 +278,6 @@ int main(int argc, char **argv)
     }
     // Read memory maps of the process
     read_proc_maps(ProcId, &HeapOffset, &HeapSize);
-    //Process.HeapOffset = heap_offset;
-    //Process.HeapSize = heap_size;
-    // Print Heap location and size
-    //(Process.HeapOffset > 0) ? printf("Heap Offset : %lx\n", Process.HeapOffset) : printf("Heap Offset Not Found\n");
-    //(Process.HeapSize > 0) ? printf("Heap Size : %lx\n", Process.HeapSize) : printf("Heap Size Not Found\n");
 
     // use process_vm_readv() to read some memory
     // https://gist.github.com/FergusInLondon/fec6aebabc3c9e61e284983618f40730
@@ -281,13 +286,17 @@ int main(int argc, char **argv)
     
     //hexdump( Heap,HeapSize);
     
-    char Find[] = {0x48,0x65,0x6c,0x6c,0x6f,0x2c,0x20,0x77,0x6f,0x72,0x6c,0x64,0x21};
-    char Replace[] = {0x49,0x4d,0x20,0x52,0x49,0x43,0x48,0x20,0x42,0x49,0x54,0x43,0x48};
+    char Find[strlen(argv[2])];
+    char Replace[strlen(argv[3])];
     size_t Find_size = sizeof(Find) / sizeof(Find[0]);
-
+    size_t Replace_size = sizeof(Replace) / sizeof(Replace[0]);
+    memcpy(Find,argv[2],Find_size);
+    memcpy(Replace,argv[3],Replace_size);
+    if (Find_size != Replace_size){
+        printf("Warning: FIND and REPLACE are different sizes!\n");
+    }
     
-    seek_and_poke(ProcId,Heap,HeapSize,HeapOffset,Find,Find_size,Replace);
-    // process_vm_writev() to write some memory
-    // https://ancat.github.io/python/2019/01/01/python-ptrace.html
+    seek_and_poke(ProcId,Heap,HeapSize,HeapOffset,Find,Find_size,Replace,Replace_size);
+
     exit(EXIT_SUCCESS);
 }
