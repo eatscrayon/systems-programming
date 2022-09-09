@@ -1,13 +1,5 @@
-# HEAPDUMP
-Dumps the heap of a process in xxd -rp compatible format using process_vm_readv
+# FIND AND POKE
 
-## Limitations
-If a process has multiple PID's it grabs the first one.
-If a process has multiple heaps, its grabs the first one.
+gcc -o example example.c && ./example # in one terminal
 
-## Instructions
-Build:
-gcc -o heapdump heapdump.c
-
-Usage:
-./heapdump <processname>
+gcc heap-find-and-poke.c;./a.out example # in a different terminal
