@@ -172,13 +172,55 @@ int peek(pid_t pid, uintptr_t offset, uintptr_t size,char buffer[])
     // Call process_vm_readv - handle any error codes
     ssize_t nread = process_vm_readv(pid, local, 1, remote, 1, 0);
 
-    int i;
+    
     memcpy(buffer, local[0].iov_base, local[0].iov_len);
 
     
     return 0;
 }
 
+void poke(pid_t pid, uintptr_t offset, uintptr_t find_size,char replace[]){
+
+    void *remotePtr = (void *)offset;
+    struct iovec local[1];
+    struct iovec remote[1];
+    char buffer[find_size];
+    strcpy(buffer, replace);
+
+    /* Set up the iovecs. */
+    local[0].iov_base = buffer;
+    remote[0].iov_base = remotePtr;
+
+    local[0].iov_len = find_size;
+    remote[0].iov_len = find_size;
+
+    /* Write 12 bytes into the child process. */
+    process_vm_writev(pid, local, 1, remote, 1, 0);
+
+}
+
+
+void seek_and_poke(pid_t pid, char heap[], uintptr_t heapSize, uintptr_t heapoffset, char find[], uintptr_t find_size, char replace[]){
+
+    //printf("%ld", find_size);
+    
+
+    for (int i=0;i < heapSize; i++ ){
+        int match = 1;
+        for (int j=0;j<find_size;j++){
+            if (heap[i+j] != find[j]){
+                match = 0;
+                break;
+            }
+        }
+        if (match){
+            printf("Want to poke %d @ %lx\n with %d bytes\n",pid, i+heapoffset, find_size );
+            poke(pid, i+heapoffset, find_size,replace);
+        }
+        //fprint("%d",heap[i])
+    }
+
+}
 
 void hexdump(char buffer[],int size){
     int i;
@@ -204,16 +246,7 @@ void hexdump(char buffer[],int size){
     }
 
 }
-// Define our struct that will hold process information
-typedef struct LinuxProc
-{
 
-    pid_t ProcId;
-    uintptr_t HeapOffset;
-    uintptr_t HeapSize;
-    //char Heap[];
-
-} LinuxProc; //<-type def
 
 int main(int argc, char **argv)
 {
@@ -223,31 +256,37 @@ int main(int argc, char **argv)
     }
     // Initialize our struct that will hold process information
     // Passing argv1 to the GetPIDbyName Function
-    LinuxProc Process;
-    Process.ProcId = GetPIDbyName(argv[1]);
+    
+    uintptr_t HeapOffset,HeapSize;
+    pid_t ProcId = GetPIDbyName(argv[1]);
 
     // Print the PID of the Process
     //(Process.ProcId > 0) ? printf("Process ID : %i\n", Process.ProcId) : printf("PID Not Found\n");
-    if (Process.ProcId < 0){
+    if (ProcId < 0){
         printf("PID Not Found\n");
         exit(EXIT_SUCCESS);
     }
     // Read memory maps of the process
-    uintptr_t heap_offset, heap_size;
-    read_proc_maps(Process.ProcId, &heap_offset, &heap_size);
-    Process.HeapOffset = heap_offset;
-    Process.HeapSize = heap_size;
+    read_proc_maps(ProcId, &HeapOffset, &HeapSize);
+    //Process.HeapOffset = heap_offset;
+    //Process.HeapSize = heap_size;
     // Print Heap location and size
     //(Process.HeapOffset > 0) ? printf("Heap Offset : %lx\n", Process.HeapOffset) : printf("Heap Offset Not Found\n");
     //(Process.HeapSize > 0) ? printf("Heap Size : %lx\n", Process.HeapSize) : printf("Heap Size Not Found\n");
 
     // use process_vm_readv() to read some memory
     // https://gist.github.com/FergusInLondon/fec6aebabc3c9e61e284983618f40730
-    char buffer[Process.HeapSize]; // create buffer to hold our heap
-    peek(Process.ProcId, Process.HeapOffset, Process.HeapSize, buffer);
+    char Heap[HeapSize]; // create buffer to hold our heap
+    peek(ProcId, HeapOffset, HeapSize, Heap);
+    
+    //hexdump( Heap,HeapSize);
+    
+    char Find[] = {0x48,0x65,0x6c,0x6c,0x6f,0x2c,0x20,0x77,0x6f,0x72,0x6c,0x64,0x21};
+    char Replace[] = {0x49,0x4d,0x20,0x52,0x49,0x43,0x48,0x20,0x42,0x49,0x54,0x43,0x48};
+    size_t Find_size = sizeof(Find) / sizeof(Find[0]);
 
-    hexdump(buffer,Process.HeapSize);
-
+    
+    seek_and_poke(ProcId,Heap,HeapSize,HeapOffset,Find,Find_size,Replace);
     // process_vm_writev() to write some memory
     // https://ancat.github.io/python/2019/01/01/python-ptrace.html
     exit(EXIT_SUCCESS);
