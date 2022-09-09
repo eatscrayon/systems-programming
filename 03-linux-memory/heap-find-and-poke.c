@@ -214,7 +214,7 @@ void seek_and_poke(pid_t pid, char heap[], uintptr_t heapSize, uintptr_t heapoff
             }
         }
         if (match){
-            printf("Want to poke %d @ %lx\n with %d bytes\n",pid, i+heapoffset, find_size );
+            printf("Want to poke %d @ %lx\n with %ld bytes\n",pid, i+heapoffset, find_size );
             poke(pid, i+heapoffset, find_size,replace);
         }
         //fprint("%d",heap[i])
